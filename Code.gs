@@ -11,7 +11,13 @@ function setupQuizSheet() {
 }
 
 function doGet() {
-  return HtmlService.createHtmlOutput('World Meningitis Day quiz endpoint is ready.');
+  try {
+    getResultsSheet_();
+    return HtmlService.createHtmlOutput('World Meningitis Day quiz results sheet is ready.');
+  } catch (error) {
+    console.error(error);
+    return HtmlService.createHtmlOutput('World Meningitis Day quiz setup: ' + quizErrorResult_(error).code);
+  }
 }
 
 function doPost(e) {
@@ -27,11 +33,25 @@ function doPost(e) {
     } else throw new Error('Invalid request');
   } catch (error) {
     console.error(error);
-    result = { ok: false, error: values.action === 'check' ? 'Could not check this email. Please try again.' : 'Could not save your result. Please try again.' };
+    result = quizErrorResult_(error);
   }
   const payload = JSON.stringify({ type: 'wmd-quiz-result', nonce: nonce, result: result }).replace(/</g, '\\u003c');
   return HtmlService.createHtmlOutput('<!doctype html><html><body><script>window.top.postMessage(' + payload + ', "*");</script></body></html>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function quizErrorResult_(error) {
+  const message = String(error && error.message || error);
+  if (message === 'SHEET_NOT_CONFIGURED') {
+    return { ok: false, code: 'SETUP_REQUIRED', error: 'This quiz is not connected to its results sheet yet. Please contact the event team.' };
+  }
+  if (message === 'SHEET_HEADERS_MISMATCH') {
+    return { ok: false, code: 'HEADERS_MISMATCH', error: 'The quiz results sheet needs attention. Please contact the event team.' };
+  }
+  if (message === 'SHEET_ACCESS_ERROR') {
+    return { ok: false, code: 'SHEET_ACCESS_ERROR', error: 'The quiz cannot access its results sheet. Please contact the event team.' };
+  }
+  return { ok: false, code: 'SERVER_ERROR', error: 'The quiz is temporarily unavailable. Please try again or contact the event team.' };
 }
 
 function checkQuizEmail_(value) {
@@ -71,15 +91,21 @@ function saveQuiz_(values) {
 
 function getResultsSheet_() {
   const id = PropertiesService.getScriptProperties().getProperty('QUIZ_SHEET_ID');
-  if (!id) throw new Error('Run setupQuizSheet from the bound script editor first');
-  const spreadsheet = SpreadsheetApp.openById(id);
+  if (!id) throw new Error('SHEET_NOT_CONFIGURED');
+  let spreadsheet;
+  try {
+    spreadsheet = SpreadsheetApp.openById(id);
+  } catch (error) {
+    console.error(error);
+    throw new Error('SHEET_ACCESS_ERROR');
+  }
   const sheet = spreadsheet.getSheetByName(SHEET_NAME) || spreadsheet.insertSheet(SHEET_NAME);
   const firstRow = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
   if (firstRow.every(function (value) { return value === ''; })) {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.setFrozenRows(1);
   } else if (HEADERS.some(function (heading, index) { return firstRow[index] !== heading; })) {
-    throw new Error('Quiz Results sheet headings do not match');
+    throw new Error('SHEET_HEADERS_MISMATCH');
   }
   return sheet;
 }
