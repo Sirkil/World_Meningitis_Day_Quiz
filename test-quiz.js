@@ -18,12 +18,10 @@ const sheet = {
   appendRow(row) { rows.push(row); },
   setFrozenRows() {}
 };
-const spreadsheet = { getId() { return 'test-sheet-id'; }, getSheetByName() { return sheet; }, insertSheet() { return sheet; } };
-const properties = new Map();
+const spreadsheet = { getSheetByName() { return sheet; }, insertSheet() { return sheet; } };
 const context = {
   console: { error() {} },
-  SpreadsheetApp: { getActiveSpreadsheet: () => spreadsheet, openById(id) { assert.equal(id, 'test-sheet-id'); return spreadsheet; }, flush() {} },
-  PropertiesService: { getScriptProperties: () => ({ getProperty(key) { return properties.get(key); }, setProperty(key, value) { properties.set(key, value); } }) },
+  SpreadsheetApp: { openById(id) { assert.equal(id, '1BncAZn3nfe_dxeW02hZX3-9KEOPIMLQZPB0hTQvb3OA'); return spreadsheet; }, flush() {} },
   LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
   HtmlService: {
     XFrameOptionsMode: { ALLOWALL: 'ALLOWALL' },
@@ -32,6 +30,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, 'Code.gs'), 'utf8'), context);
+assert.match(context.doGet().html, /results sheet is ready/);
 context.setupQuizSheet();
 const email = 'test@example.com';
 const initial = context.doPost({ parameter: { action: 'check', email, nonce: 'b'.repeat(32) } });
@@ -48,10 +47,6 @@ assert.match(repeated.html, /ALREADY_TAKEN/);
 assert.equal(rows.length, 2);
 const checked = context.doPost({ parameter: { action: 'check', email: 'TEST@example.com', nonce: 'c'.repeat(32) } });
 assert.match(checked.html, /"taken":true/);
-properties.delete('QUIZ_SHEET_ID');
-assert.match(context.doGet().html, /SETUP_REQUIRED/);
-assert.match(context.doPost({ parameter: { action: 'check', email, nonce: 'd'.repeat(32) } }).html, /SETUP_REQUIRED/);
-properties.set('QUIZ_SHEET_ID', 'test-sheet-id');
 rows[0] = ['Incorrect header', ...rows[0].slice(1)];
 assert.match(context.doGet().html, /HEADERS_MISMATCH/);
 rows[0] = ['Name', ...rows[0].slice(1)];

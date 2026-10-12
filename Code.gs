@@ -1,12 +1,10 @@
-/** Bind this script to the Google Sheet that will hold quiz responses. */
+/** Deploy this Apps Script as a web app that runs as the Sheet owner. */
+const QUIZ_SHEET_ID = '1BncAZn3nfe_dxeW02hZX3-9KEOPIMLQZPB0hTQvb3OA';
 const SHEET_NAME = 'World Meningitis Day Quiz Logs';
 const HEADERS = ['Name', 'Email', 'Consent', 'Q1 Points', 'Q2 Points', 'Q3 Points', 'Q4 Points', 'Q5 Points', 'Q6 Points', 'Q7 Points', 'Q8 Points', 'Q9 Points', 'Q10 Points', 'Total'];
 
-/** Run once from the Sheet's Apps Script editor before deploying the web app. */
+/** Optional: run from the Apps Script editor to create and check the results tab. */
 function setupQuizSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  if (!spreadsheet) throw new Error('Open this script from the results Sheet');
-  PropertiesService.getScriptProperties().setProperty('QUIZ_SHEET_ID', spreadsheet.getId());
   getResultsSheet_();
 }
 
@@ -90,11 +88,10 @@ function saveQuiz_(values) {
 }
 
 function getResultsSheet_() {
-  const id = PropertiesService.getScriptProperties().getProperty('QUIZ_SHEET_ID');
-  if (!id) throw new Error('SHEET_NOT_CONFIGURED');
+  if (!QUIZ_SHEET_ID) throw new Error('SHEET_NOT_CONFIGURED');
   let spreadsheet;
   try {
-    spreadsheet = SpreadsheetApp.openById(id);
+    spreadsheet = SpreadsheetApp.openById(QUIZ_SHEET_ID);
   } catch (error) {
     console.error(error);
     throw new Error('SHEET_ACCESS_ERROR');

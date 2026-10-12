@@ -1,30 +1,29 @@
 # World Meningitis Day quiz
 
-The quiz is a static page for GitHub Pages. `index.html` is the entry page; `Quiz.html` redirects to it. The design is in `style.css`, the questions are in `questions.js`, and the quiz behavior is in `quiz.js`.
+The quiz is a static page for GitHub Pages. `index.html` is the entry page. The design is in `style.css`, the questions are in `questions.js`, and the quiz behavior is in `quiz.js`.
 
 ## Publish on GitHub Pages
 
-1. Put `index.html`, `Quiz.html`, `style.css`, `questions.js`, `quiz.js`, `config.js`, `.nojekyll`, and the `assets` folder at the top level of the repository. The other files are setup and tests.
+1. Put `index.html`, `style.css`, `questions.js`, `quiz.js`, `config.js`, `.nojekyll`, and the `assets` folder at the top level of the repository. The other files are setup and tests.
 2. In the repository, open **Settings → Pages**. Set **Source** to **Deploy from a branch**, choose your publishing branch (for example, `main`), and select **/(root)**.
 3. Open the GitHub Pages URL shown in Settings. `index.html` loads automatically. The relative file paths also work for a project site at `https://USERNAME.github.io/REPOSITORY/`.
 4. Keep the deployed Apps Script `/exec` URL in `config.js`. This URL is public website configuration, so it is visible to visitors. Do not put a Google account credential or Sheet data in that file.
 
 ## Connect your Google Sheet
 
-1. Open the Google Sheet that should hold the quiz results. Choose **Extensions → Apps Script**.
-2. Replace the default script with the contents of `Code.gs` and save it. Select `setupQuizSheet` in the Apps Script editor, click **Run**, and authorize it. This records the Sheet ID for web requests and creates the **World Meningitis Day Quiz Logs** tab.
-3. Choose **Deploy → New deployment → Web app**. Set **Execute as** to **Me** and allow access to the people who will take the quiz. For a public quiz, choose **Anyone**. Authorize the deployment and copy its URL ending in `/exec`.
-4. Paste that URL between the quotes in `config.js`.
-5. Publish the quiz files on GitHub Pages. After changing `Code.gs`, open **Deploy → Manage deployments**, edit the existing web app, select **New version**, and deploy. This keeps the `/exec` URL in `config.js` working.
-6. Open that `/exec` URL in a browser. It should say **World Meningitis Day quiz results sheet is ready.** If it shows a setup code, use the troubleshooting steps below.
+1. The target Google Sheet is identified by `QUIZ_SHEET_ID` at the top of `Code.gs`. The current value is the Sheet supplied for this quiz. If the results should go to a different Sheet, replace that ID first.
+2. Open the Apps Script project that owns the `/exec` URL in `config.js`. Replace its code with the contents of `Code.gs` and save it. The current deployment reports `SETUP_REQUIRED`; saving the local file alone will not change the live deployment.
+3. Choose **Deploy → Manage deployments**, edit the web app used in `config.js`, select **New version**, and deploy. Set **Execute as** to **Me** and access to **Anyone** for a public quiz. Authorize access to the Sheet if prompted. Keep the existing `/exec` URL so `config.js` does not need to change. If you cannot find that deployment, open the target Sheet, choose **Extensions → Apps Script**, paste `Code.gs`, then choose **Deploy → New deployment → Web app** with the same settings. Put its new `/exec` URL in `config.js` and republish the page.
+4. Open the active `/exec` URL in a browser. It must say **World Meningitis Day quiz results sheet is ready.** Then take a complete test quiz with a new test email and confirm that a row appears in the **World Meningitis Day Quiz Logs** tab. A duplicate email cannot take the quiz again.
+5. Publish the quiz files on GitHub Pages if any page files change. Updating only `Code.gs` in the existing deployment requires the Apps Script deployment above, not a Pages republish.
 
 The script creates a **World Meningitis Day Quiz Logs** tab with these columns: Name, Email, Consent, Q1 Points through Q10 Points, and Total. It checks email addresses before the quiz starts and again when a result is saved. Results are stored only in that Google Sheet. No response file or browser storage is used.
 
 ## If Start quiz shows a sheet error
 
-- **SETUP_REQUIRED:** Open the results Sheet, choose **Extensions → Apps Script**, run `setupQuizSheet` once, and authorize it. Then reload the quiz. This is required even when the script is attached to the Sheet, because a web app cannot use the active Sheet automatically.
+- **SETUP_REQUIRED:** The live deployment is still running an older version of `Code.gs` or has no Sheet ID. Save the current `Code.gs` in the deployed Apps Script project and deploy a **New version** as described above.
 - **HEADERS_MISMATCH:** Open the **World Meningitis Day Quiz Logs** tab. Row 1 must contain the headings listed above, in that exact order. Correct the headings without changing saved response rows.
-- **SHEET_ACCESS_ERROR:** Run `setupQuizSheet` again from the correct results Sheet and confirm that the Google account chosen under **Execute as Me** can open it.
+- **SHEET_ACCESS_ERROR:** Confirm that `QUIZ_SHEET_ID` is correct and the Google account chosen under **Execute as Me** can edit that Sheet.
 - **SERVER_ERROR:** In Apps Script, open **Executions** to see the logged error. Check that the deployed web app has the latest `Code.gs` version.
 
 The one-time rule checks the email entered by the participant. It does not verify ownership of that email address.
