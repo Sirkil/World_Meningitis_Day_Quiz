@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Meningitis Day Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="brand"><img src="assets/Know_Before_You_Go.png" alt="Know Before You Go"><span>World Meningitis Day</span></header>
+    <main>
+      <section class="panel" id="startScreen" aria-labelledby="startTitle">
+        <div class="eyebrow">Know Before You Go</div>
+        <h1 id="startTitle">Meningitis quiz</h1>
+        <p class="intro">Ten questions. Ten seconds each. Earn 10 points for a correct answer, plus one point for every second remaining.</p>
+        <form id="startForm" novalidate>
+          <div class="form-grid">
+            <label class="field" for="participantName">Name<input id="participantName" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Your full name" required></label>
+            <label class="field" for="participantEmail">Email<input id="participantEmail" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" placeholder="you@example.com" required></label>
+          </div>
+          <label class="consent" for="participantConsent"><input id="participantConsent" name="consent" type="checkbox" required><span>I acknowledge that I have read and understood this consent notice and I agree to participate. I voluntarily agree to share my question during the webinar. I understand that I can withdraw my consent at any time during the event by contacting the World Meningitis Day event team or email ahmed.dager@sanofi.com, and my question will be immediately removed from the webinar.</span></label>
+          <div class="actions"><button class="primary" id="startButton" type="submit" disabled>Start quiz</button></div>
+        </form>
+      </section>
+
+      <section class="panel" id="quizScreen" aria-labelledby="questionTitle" hidden>
+        <div class="quiz-head"><div><div class="eyebrow" id="sectionName"></div><div class="question-count" id="questionCount"></div></div><div class="timer" id="timer" role="timer" aria-label="Seconds remaining">10</div></div>
+        <div class="progress" aria-hidden="true"><span id="progressFill"></span></div>
+        <h2 id="questionTitle"></h2>
+        <div class="answers" id="answers"></div>
+        <div class="answer-note" id="answerNote" aria-live="polite"></div>
+        <div class="quiz-footer"><div class="score">Total points <strong id="runningTotal">0</strong></div><button class="primary" id="nextButton" type="button" disabled>Next question</button></div>
+      </section>
+
+      <section class="panel finish-panel" id="finishScreen" aria-labelledby="finishTitle" hidden>
+        <img src="assets/Know_Before_You_Go.png" alt="Know Before You Go">
+        <div class="eyebrow">World Meningitis Day</div>
+        <h1 id="finishTitle">Thank you for taking this quiz!</h1>
+        <p>Your result has been saved.</p>
+        <div class="total-points"><strong id="finalTotal">0</strong><span>Total points</span></div>
+      </section>
+    </main>
+    <footer class="footnote">World Meningitis Day</footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="alreadyDialog" aria-labelledby="alreadyTitle"><h2 id="alreadyTitle">Quiz already taken</h2><p>You have already taken this quiz.</p><div class="actions"><button class="primary" id="dialogOk" type="button">OK</button></div></dialog>
+  <script src="config.js" defer></script>
+  <script src="questions.js" defer></script>
+  <script src="quiz.js" defer></script>
+</body>
+</html>
