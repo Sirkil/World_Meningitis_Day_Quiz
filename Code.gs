@@ -70,7 +70,7 @@ function saveQuiz_(values) {
   let points;
   try { points = JSON.parse(values.points); } catch (error) { throw new Error('Invalid points'); }
   if (!Array.isArray(points) || points.length !== 10 || !points.every(function (point) {
-    return Number.isInteger(point) && (point === 0 || (point >= 11 && point <= 20));
+    return Number.isInteger(point) && (point === 0 || (point >= 11 && point <= 25));
   })) throw new Error('Invalid points');
   const total = points.reduce(function (sum, point) { return sum + point; }, 0);
 

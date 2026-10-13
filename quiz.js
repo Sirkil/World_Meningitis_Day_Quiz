@@ -16,6 +16,7 @@
   let deadline = 0;
   let toastTimeout;
   let startPending = false;
+  const QUESTION_SECONDS = 15;
 
   function scriptUrl() {
     const raw = String(window.QUIZ_SCRIPT_URL || '').trim();
@@ -123,7 +124,7 @@
   });
 
   function stopTimer() { if (countdown) clearInterval(countdown); countdown = null; }
-  function remainingSeconds() { return Math.max(0, Math.min(10, Math.ceil((deadline - performance.now()) / 1000))); }
+  function remainingSeconds() { return Math.max(0, Math.min(QUESTION_SECONDS, Math.ceil((deadline - performance.now()) / 1000))); }
   function drawTimer() {
     const remaining = remainingSeconds();
     $('timer').textContent = remaining;
@@ -156,7 +157,7 @@
       button.addEventListener('click', () => submitAnswer(choice));
       return button;
     }));
-    deadline = performance.now() + 10000;
+    deadline = performance.now() + QUESTION_SECONDS * 1000;
     drawTimer();
     countdown = setInterval(drawTimer, 100);
   }
